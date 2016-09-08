@@ -1,0 +1,43 @@
+{
+    "name":              "chaoticwave/twister",
+    "description":       "Laravel-Friendly Twitter Service",
+    "license":           "MIT",
+    "type":              "library",
+    "authors":           [
+        {
+            "name":  "Jerry Ablan",
+            "email": "jerryablan@gmail.com"
+        }
+    ],
+    "keywords":          [
+        "utility",
+        "laravel",
+        "tweet",
+        "twitter"
+    ],
+    "minimum-stability": "stable",
+    "require":           {
+        "php":                     ">=5.5.9",
+        "chaoticwave/blue-velvet": "1.0.*",
+        "themattharris/tmhoauth":  "*"
+    },
+    "require-dev":       {
+        "barryvdh/laravel-ide-helper": "^2.2",
+        "fzaninotto/faker":            "~1.4",
+        "phpunit/phpunit":             "~4.0",
+        "laravel/framework":           "5.2.*"
+    },
+    "autoload":          {
+        "psr-4": {
+            "ChaoticWave\\Twister\\": "src/"
+        }
+    },
+    "autoload-dev":      {
+        "classmap": []
+    },
+    "extra":             {
+        "branch-alias": {
+            "dev-develop": "1.x-dev"
+        }
+    }
+}

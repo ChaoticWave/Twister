@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/inspectionProfiles/
+.idea/workspace.xml
+vendor/
+_ide_helper.php
+storage/
+/src/Traits/
