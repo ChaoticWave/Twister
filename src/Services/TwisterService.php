@@ -60,6 +60,10 @@ class TwisterService extends BaseService
      * @var UriInterface
      */
     protected $currentUri;
+    /**
+     * @var string The user who's feed to pull
+     */
+    protected $user;
 
     //******************************************************************************
     //* Methods
@@ -83,6 +87,7 @@ class TwisterService extends BaseService
         $this->uris = new UriFactory();
         $this->currentUri = $this->uris->createFromSuperGlobalArray($_SERVER);
         $this->currentUri->setQuery('');
+        $this->user = config('twister.user');
 
         $this->credentials = new Credentials(
             config('twister.secrets.consumer_key'),
@@ -104,14 +109,27 @@ class TwisterService extends BaseService
     }
 
     /**
+     * @param int $count
+     *
      * @return array
      */
-    public function getUserTimeline()
+    public function getUserTimeline($count = 25)
     {
-        return json_decode($this->client->request('statuses/user_timeline.json'));
+        $_query = ['count=' . $count];
+
+        if ($this->user) {
+            $_query[] = 'screen_name=' . $this->user;
+        }
+
+        return json_decode($this->client->request('statuses/user_timeline.json?' . implode('&', $_query)));
     }
 
-    protected function checkForInteractiveRequest()
+    /**
+     * @param bool $echo
+     *
+     * @return mixed|null
+     */
+    protected function checkForInteractiveRequest($echo = false)
     {
         if (!empty($_GET['oauth_token'])) {
             $_token = $this->store->retrieveAccessToken(static::SERVICE_NAME);
@@ -124,11 +142,7 @@ class TwisterService extends BaseService
             );
 
             //  Verify creds now that we have access token
-            $_result = json_decode($this->client->request('account/verify_credentials.json'));
-
-            echo 'result: <pre>' . print_r($_result, true) . '</pre>';
-
-            return;
+            return json_decode($this->client->request('account/verify_credentials.json'));
         }
 
         if (!empty($_GET['go']) && 'go' === $_GET['go']) {
@@ -137,10 +151,16 @@ class TwisterService extends BaseService
             $_url = $this->client->getAuthorizationUri(['oauth_token' => $_token->getRequestToken()]);
             header('Location: ' . $_url);
 
-            return;
+            return true;
         }
 
-        $_url = $this->currentUri->getRelativeUri() . '?go=go';
-        echo '<a href="' . $_url . '">Login with Twitter!</a>';
+        if ($echo) {
+            $_url = $this->currentUri->getRelativeUri() . '?go=go';
+            echo '<a href="' . $_url . '">Login with Twitter!</a>';
+
+            return true;
+        }
+
+        return false;
     }
 }

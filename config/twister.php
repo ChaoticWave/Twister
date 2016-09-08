@@ -3,6 +3,8 @@
  * Twister service default config file
  */
 return [
+    /** A user to target versus the consumer_key owner */
+    'user'    => null,
     /** API keys, sourced from the environment */
     'secrets' => [
         //  An "application" key and secret
