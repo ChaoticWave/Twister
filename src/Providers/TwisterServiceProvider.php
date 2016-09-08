@@ -1,7 +1,7 @@
 <?php namespace ChaoticWave\Twister\Providers;
 
 use ChaoticWave\BlueVelvet\Providers\BaseServiceProvider;
-use ChaoticWave\Twister\Services\TwitterService;
+use ChaoticWave\Twister\Services\TwisterService;
 
 class TwisterServiceProvider extends BaseServiceProvider
 {
@@ -21,7 +21,7 @@ class TwisterServiceProvider extends BaseServiceProvider
     {
         $this->singleton(static::ALIAS,
             function($app) {
-                return new TwitterService($app);
+                return new TwisterService($app);
             });
     }
 }

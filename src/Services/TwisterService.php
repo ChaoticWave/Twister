@@ -15,6 +15,15 @@ use OAuth\ServiceFactory;
 class TwisterService extends BaseService
 {
     //******************************************************************************
+    //* Constants
+    //******************************************************************************
+
+    /**
+     * @var string The client's service name
+     */
+    const CLIENT_SERVICE_NAME = 'twitter';
+
+    //******************************************************************************
     //* Members
     //******************************************************************************
 
@@ -76,7 +85,7 @@ class TwisterService extends BaseService
             $this->currentUri->getAbsoluteUri()
         );
 
-        $this->client = $this->services->createService('twitter', $this->credentials, $this->store);
+        $this->client = $this->services->createService(static::CLIENT_SERVICE_NAME, $this->credentials, $this->store);
 
         $this->checkForInteractiveRequest();
     }
@@ -94,14 +103,14 @@ class TwisterService extends BaseService
         if (!empty($_GET['oauth_token'])) {
             $_token = $this->store->retrieveAccessToken('Twitter');
 
-            // This was a callback request from twitter, get the token
+            //  If this was a callback request from twitter, get the token
             $this->client->requestAccessToken(
                 $_GET['oauth_token'],
                 $_GET['oauth_verifier'],
                 $_token->getRequestTokenSecret()
             );
 
-            // Send a request now that we have access token
+            //  Verify creds now that we have access token
             $_result = json_decode($this->client->request('account/verify_credentials.json'));
 
             echo 'result: <pre>' . print_r($_result, true) . '</pre>';
