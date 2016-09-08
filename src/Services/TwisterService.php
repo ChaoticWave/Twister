@@ -10,6 +10,7 @@ use OAuth\Common\Service\ServiceInterface;
 use OAuth\Common\Storage\Session;
 use OAuth\Common\Storage\TokenStorageInterface;
 use OAuth\OAuth1\Service\Twitter;
+use OAuth\OAuth1\Token\StdOAuth1Token;
 use OAuth\ServiceFactory;
 
 class TwisterService extends BaseService
@@ -19,9 +20,13 @@ class TwisterService extends BaseService
     //******************************************************************************
 
     /**
+     * @var string The client's service id
+     */
+    const SERVICE_ID = 'twitter';
+    /**
      * @var string The client's service name
      */
-    const CLIENT_SERVICE_NAME = 'twitter';
+    const SERVICE_NAME = 'Twitter';
 
     //******************************************************************************
     //* Members
@@ -85,7 +90,15 @@ class TwisterService extends BaseService
             $this->currentUri->getAbsoluteUri()
         );
 
-        $this->client = $this->services->createService(static::CLIENT_SERVICE_NAME, $this->credentials, $this->store);
+        $this->client = $this->services->createService(static::SERVICE_ID, $this->credentials, $this->store);
+
+        if (null !== ($_accessToken = config('twister.secrets.access_token'))) {
+            if (null !== ($_accessTokenSecret = config('twister.secrets.access_token_secret'))) {
+                $_token = new StdOAuth1Token($_accessToken);
+                $_token->setAccessTokenSecret($_accessTokenSecret);
+                $this->store->storeAccessToken(static::SERVICE_NAME, $_token);
+            }
+        }
 
         $this->checkForInteractiveRequest();
     }
@@ -101,7 +114,7 @@ class TwisterService extends BaseService
     protected function checkForInteractiveRequest()
     {
         if (!empty($_GET['oauth_token'])) {
-            $_token = $this->store->retrieveAccessToken('Twitter');
+            $_token = $this->store->retrieveAccessToken(static::SERVICE_NAME);
 
             //  If this was a callback request from twitter, get the token
             $this->client->requestAccessToken(
