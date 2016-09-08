@@ -1,7 +1,6 @@
 <?php namespace ChaoticWave\Twister\Services;
 
 use ChaoticWave\BlueVelvet\Services\BaseService;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
