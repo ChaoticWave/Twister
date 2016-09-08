@@ -1,4 +1,4 @@
-<?php namespace ChaoticWave\Twister;
+<?php namespace ChaoticWave\Twister\Services;
 
 use ChaoticWave\BlueVelvet\Services\BaseService;
 use Exception;
@@ -85,98 +85,6 @@ class TwitterService extends BaseService
         $_token = is_array($token) ? array_get($token, 'oauth_token') : $token;
 
         return $this->endpoints[$login ? 'authenticate' : 'authorize'] . '?oauth_token=' . $_token . '&force_login=' . ($force ? 'true' : 'false');
-    }
-
-    /**
-     * @param        $name
-     * @param string $requestMethod
-     * @param array  $_params
-     * @param bool   $multipart
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function query($name, $requestMethod = 'GET', $_params = [], $multipart = false)
-    {
-        $this->config['host'] = $this->tconfig['API_URL'];
-
-        if ($multipart) {
-            $this->config['host'] = $this->tconfig['UPLOAD_URL'];
-        }
-
-        $url = $this->client->url($this->tconfig['API_VERSION'] . '/' . $name);
-
-        $this->client->user_request([
-            'method'    => $requestMethod,
-            'host'      => $name,
-            'url'       => $url,
-            'params'    => $_params,
-            'multipart' => $multipart,
-        ]);
-
-        $response = $this->client->response;
-
-        $format = 'object';
-
-        if (isset($_params['format'])) {
-            $format = $_params['format'];
-        }
-
-        $this->log('FORMAT : ' . $format);
-
-        $this->error = $response['error'];
-
-        if ($this->error) {
-            $this->log('ERROR_CODE : ' . $response['errno']);
-            $this->log('ERROR_MSG : ' . $response['error']);
-        }
-
-        if (isset($response['code']) && ($response['code'] < 200 || $response['code'] > 206)) {
-            $_response = json_decode($response['response'], true);
-
-            if (is_array($_response)) {
-                if (array_key_exists('errors', $_response)) {
-                    $error_code = $_response['errors'][0]['code'];
-                    $error_msg = $_response['errors'][0]['message'];
-                } else {
-                    $error_code = $response['code'];
-                    $error_msg = $response['error'];
-                }
-            } else {
-                $error_code = $response['code'];
-                $error_msg = ($error_code == 503) ? 'Service Unavailable' : 'Unknown error';
-            }
-
-            $this->log('ERROR_CODE : ' . $error_code);
-            $this->log('ERROR_MSG : ' . $error_msg);
-
-            throw new Exception('[' . $error_code . '] ' . $error_msg, $response['code']);
-        }
-
-        switch ($format) {
-            default :
-            case 'object' :
-                $response = json_decode($response['response']);
-                break;
-            case 'json'   :
-                $response = $response['response'];
-                break;
-            case 'array'  :
-                $response = json_decode($response['response'], true);
-                break;
-        }
-
-        return $response;
-    }
-
-    public function get($name, $_params = [], $multipart = false)
-    {
-        return $this->query($name, 'GET', $_params, $multipart);
-    }
-
-    public function post($name, $_params = [], $multipart = false)
-    {
-        return $this->query($name, 'POST', $_params, $multipart);
     }
 
     /**

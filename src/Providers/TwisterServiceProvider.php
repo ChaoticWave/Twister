@@ -1,9 +1,9 @@
-<?php namespace ChaoticWave\Twister\Services;
+<?php namespace ChaoticWave\Twister\Providers;
 
 use ChaoticWave\BlueVelvet\Providers\BaseServiceProvider;
-use ChaoticWave\Twister\TwitterService;
+use ChaoticWave\Twister\Services\TwitterService;
 
-class TwitterServiceProvider extends BaseServiceProvider
+class TwisterServiceProvider extends BaseServiceProvider
 {
     //******************************************************************************
     //* Constants
