@@ -23,5 +23,10 @@ class TwisterServiceProvider extends BaseServiceProvider
             function($app) {
                 return new TwisterService($app);
             });
+
+        //  Register our facade
+        if (!class_exists('Twister', false)) {
+            class_alias('ChaoticWave\Twister\Facades\Twister', 'Twister');
+        }
     }
 }
