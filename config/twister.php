@@ -4,18 +4,35 @@
  */
 return [
     /** Twitter API version */
-    'version'     => '1.1',
-    /** If true, enforce use of https */
-    'enforce_ssl' => true,
+    'version'   => '1.1',
     /** OAuth endpoints */
-    'endpoints'   => [
-        'authenticate'  => 'https://api.twitter.com/oauth/authenticate',
-        'authorize'     => 'https://api.twitter.com/oauth/authorize',
-        'access_token'  => 'https://api.twitter.com/oauth/access_token',
-        'request_token' => 'https://api.twitter.com/oauth/request_token',
+    'endpoints' => [
+        'application'     => ['rate_limit_status'],
+        'account'         => [
+            'settings',
+            'verify_credentials',
+            'update_delivery_device',
+            'update_profile',
+            'update_profile_background_image',
+            'update_profile_image',
+            'remove_profile_banner',
+            'update_profile_banner',
+        ],
+        'blocks'          => ['list', 'id', 'create', 'destroy'],
+        'direct_messages' => ['', 'sent', 'show', 'destroy', 'new'],
+        'favorites'       => [],
+        'friends'         => [],
+        'geo'             => [],
+        'help'            => ['configuration', 'languages', 'privacy', 'tos'],
+        'lists'           => [],
+        'media'           => [],
+        'search'          => [],
+        'statuses'        => [],
+        'trend'           => [],
+        'user'            => ['report_spam',],
     ],
     /** API keys, sourced from the environment */
-    'secrets'     => [
+    'secrets'   => [
         //  An "application" key and secret
         'consumer_key'    => env('TWISTER_CONSUMER_KEY'),
         'consumer_secret' => env('TWISTER_CONSUMER_SECRET'),

@@ -1,31 +1,51 @@
 <?php namespace ChaoticWave\Twister\Services;
 
 use ChaoticWave\BlueVelvet\Services\BaseService;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use OAuth\Common\Consumer\Credentials;
+use OAuth\Common\Consumer\CredentialsInterface;
+use OAuth\Common\Http\Uri\UriFactory;
+use OAuth\Common\Http\Uri\UriFactoryInterface;
+use OAuth\Common\Http\Uri\UriInterface;
+use OAuth\Common\Service\ServiceInterface;
+use OAuth\Common\Storage\Session;
+use OAuth\Common\Storage\TokenStorageInterface;
+use OAuth\OAuth1\Service\Twitter;
+use OAuth\ServiceFactory;
 
-class TwitterService extends BaseService
+class TwisterService extends BaseService
 {
     //******************************************************************************
     //* Members
     //******************************************************************************
 
     /**
-     * @var \OAuth
+     * @var Twitter
      */
     protected $client;
     /**
-     * @var bool
+     * @var CredentialsInterface
      */
-    protected $forceSsl;
-    /**
-     * @var string
-     */
-    protected $userAgent;
+    protected $credentials;
     /**
      * @var array The available Twitter endpoints
      */
     protected $endpoints;
+    /**
+     * @var TokenStorageInterface
+     */
+    protected $store;
+    /**
+     * @var UriFactoryInterface
+     */
+    protected $uris;
+    /**
+     * @var ServiceInterface|\OAuth\OAuth1\Service\ServiceInterface|\OAuth\OAuth2\Service\ServiceInterface
+     */
+    protected $services;
+    /**
+     * @var UriInterface
+     */
+    protected $currentUri;
 
     //******************************************************************************
     //* Methods
@@ -43,104 +63,62 @@ class TwitterService extends BaseService
         parent::__construct($app);
 
         $this->endpoints = \config('twister.endpoints', []);
-        $this->forceSsl = \config('twister.force_ssl', true);
-        $this->userAgent = \config('twister.user_agent', 'ChaoticWave Twister/1.0.0');
+        $this->store = new Session(true, 'twister-oauth-token', 'twister-oauth-state');
+
+        $this->services = new ServiceFactory();
+        $this->uris = new UriFactory();
+        $this->currentUri = $this->uris->createFromSuperGlobalArray($_SERVER);
+        $this->currentUri->setQuery('');
+
+        $this->credentials = new Credentials(
+            config('twister.secrets.consumer_key'),
+            config('twister.secrets.consumer_secret'),
+            $this->currentUri->getAbsoluteUri()
+        );
+
+        $this->client = $this->services->createService('twitter', $this->credentials, $this->store);
+
+        $this->checkForInteractiveRequest();
     }
 
     /**
-     * Get a request_token from Twitter
-     *
-     * @param string $callback Optional callback to insert into the auth flow
-     *
-     * @return array|bool A hash with the token and secret. FALSE on failure
-     * @throws \HttpException
-     */
-    public function getRequestToken($callback = null)
-    {
-        return $this->api('request_token', $callback ? ['oauth_callback' => $callback] : []);
-    }
-
-    /**
-     * @param string|null $verifier
-     *
-     * @return array|bool A hash with the token and secret. FALSE on failure.
-     */
-    public function getAccessToken($verifier = null)
-    {
-        return $this->api('access_token', $verifier ? ['oauth_verifier' => $verifier] : []);
-    }
-
-    /**
-     * Get the authorize URL
-     *
-     * @param array $token
-     * @param bool  $login
-     * @param bool  $force
-     *
-     * @return string
-     */
-    public function getAuthorizeUrl($token, $login = true, $force = false)
-    {
-        $_token = is_array($token) ? array_get($token, 'oauth_token') : $token;
-
-        return $this->endpoints[$login ? 'authenticate' : 'authorize'] . '?oauth_token=' . $_token . '&force_login=' . ($force ? 'true' : 'false');
-    }
-
-    /**
-     * @param string     $which
-     * @param mixed|null $default
-     *
-     * @return string
-     */
-    protected function getEndpoint($which, $default = null)
-    {
-        return $this->client->url(array_get($this->endpoints, $which, $default));
-    }
-
-    /**
-     * @param string $endpoint
-     * @param array  $params
-     * @param string $method
-     *
      * @return array
      */
-    protected function api($endpoint, $params = [], $method = Request::METHOD_GET)
+    public function getUserTimeline()
     {
-        $this->client->request($method, $this->getEndpoint($endpoint), $params);
-
-        return $this->parseResponse($this->client->response);
+        return json_decode($this->client->request('statuses/user_timeline.json'));
     }
 
-    /**
-     * @param array $response
-     * @param bool  $reset If true, resets the client's token
-     *
-     * @return bool
-     * @throws \HttpException
-     */
-    protected function parseResponse($response, $reset = true)
+    protected function checkForInteractiveRequest()
     {
-        if (!is_array($response)) {
-            return false;
+        if (!empty($_GET['oauth_token'])) {
+            $_token = $this->store->retrieveAccessToken('Twitter');
+
+            // This was a callback request from twitter, get the token
+            $this->client->requestAccessToken(
+                $_GET['oauth_token'],
+                $_GET['oauth_verifier'],
+                $_token->getRequestTokenSecret()
+            );
+
+            // Send a request now that we have access token
+            $_result = json_decode($this->client->request('account/verify_credentials.json'));
+
+            echo 'result: <pre>' . print_r($_result, true) . '</pre>';
+
+            return;
         }
 
-        $_code = array_get($response, 'code');
-        $_message = array_get($response, 'response');
+        if (!empty($_GET['go']) && 'go' === $_GET['go']) {
+            $_token = $this->client->requestRequestToken();
 
-        if (Response::HTTP_OK != $_code) {
-            throw new \HttpException($_message, $_code);
+            $_url = $this->client->getAuthorizationUri(['oauth_token' => $_token->getRequestToken()]);
+            header('Location: ' . $_url);
+
+            return;
         }
 
-        parse_str($_message, $_token);
-
-        if (isset($_token['oauth_token'], $_token['oauth_token_secret'])) {
-            if ($reset) {
-                $this->client->reconfigure(['token' => $_token['oauth_token'], 'secret' => $_token['oauth_token_secret']]);
-            }
-
-            return $_token;
-        }
-
-        return false;
+        $_url = $this->currentUri->getRelativeUri() . '?go=go';
+        echo '<a href="' . $_url . '">Login with Twitter!</a>';
     }
 }
