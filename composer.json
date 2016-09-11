@@ -15,10 +15,10 @@
         "tweet",
         "twitter"
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require":           {
         "php":                     ">=5.5.9",
-        "chaoticwave/blue-velvet": "1.0.*",
+        "chaoticwave/blue-velvet": "dev-develop as dev-master",
         "lusitanian/oauth":        "~0.3"
     },
     "require-dev":       {

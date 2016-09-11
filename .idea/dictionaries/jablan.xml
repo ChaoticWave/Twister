@@ -4,8 +4,10 @@
       <w>favorited</w>
       <w>retweet</w>
       <w>retweeted</w>
+      <w>retweets</w>
       <w>themattharris</w>
       <w>tmhoauth</w>
+      <w>unretweet</w>
     </words>
   </dictionary>
 </component>

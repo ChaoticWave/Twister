@@ -5,38 +5,4 @@
       <BehatSettings />
     </behat_settings>
   </component>
-  <component name="ProjectInspectionProfilesVisibleTreeState">
-    <entry key="Project Default">
-      <profile-state>
-        <expanded-state>
-          <State>
-            <id />
-          </State>
-          <State>
-            <id>Data flow issuesJavaScript</id>
-          </State>
-          <State>
-            <id>DocBlocksJoomla!</id>
-          </State>
-          <State>
-            <id>Error handlingJavaScript</id>
-          </State>
-          <State>
-            <id>JavaScript</id>
-          </State>
-          <State>
-            <id>JavaScript validity issuesJavaScript</id>
-          </State>
-          <State>
-            <id>Joomla!</id>
-          </State>
-        </expanded-state>
-        <selected-state>
-          <State>
-            <id>BashSupport</id>
-          </State>
-        </selected-state>
-      </profile-state>
-    </entry>
-  </component>
 </project>

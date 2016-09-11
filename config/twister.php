@@ -4,9 +4,13 @@
  */
 return [
     /** A user to target versus the consumer_key owner */
-    'user'    => null,
+    'user'        => null,
+    /** The token store to use. Can be 'memory' (or 'array'), 'session', or 'laravel' to use the Laravel cache */
+    'store'       => 'session',
+    /** The default number of minutes to keep tokens alive */
+    'default_ttl' => 20,
     /** API keys, sourced from the environment */
-    'secrets' => [
+    'secrets'     => [
         //  An "application" key and secret
         'consumer_key'    => env('TWISTER_CONSUMER_KEY'),
         'consumer_secret' => env('TWISTER_CONSUMER_SECRET'),
