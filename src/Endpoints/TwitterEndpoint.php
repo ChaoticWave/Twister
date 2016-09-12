@@ -1,5 +1,6 @@
 <?php namespace ChaoticWave\Twister\Endpoints;
 
+use ChaoticWave\BlueVelvet\Enums\Verbs;
 use ChaoticWave\BlueVelvet\Traits\HasAppLogger;
 use ChaoticWave\BlueVelvet\Utility\Uri;
 use ChaoticWave\Twister\Contracts\ResourcePathAware;
@@ -31,31 +32,37 @@ class TwitterEndpoint implements ResourcePathAware
      * @var array Query string parameters
      */
     protected $query;
+    /**
+     * @var string The verb for the endpoint
+     */
+    protected $method = Verbs::GET;
 
     //******************************************************************************
     //* Methods
     //******************************************************************************
 
     /**
-     * @param string $path  The resource path
-     * @param array  $query Any query parameters
+     * @param string $path   The resource path
+     * @param array  $query  Any query parameters
+     * @param string $method The HTTP method
      */
-    public function __constructor($path, $query = [])
+    public function __constructor($path, $query = [], $method = Verbs::GET)
     {
-        $this->setResource($path, $query);
+        $this->setResource($path, $query, $method);
     }
 
     /**
-     * @param string $resource
-     * @param array  $query   Any query parameters
-     * @param bool   $leading If you want a leading slash or not
+     * @param string $resource The resource path
+     * @param array  $query    Any query parameters
+     * @param string $method   The HTTP method
      *
      * @return $this
      */
-    protected function setResource($resource = null, $query = [], $leading = false)
+    protected function setResource($resource = null, $query = [], $method = Verbs::GET)
     {
         $this->path = $resource;
         $this->query = $query;
+        $this->method = $method;
 
         return $this;
     }
@@ -73,17 +80,25 @@ class TwitterEndpoint implements ResourcePathAware
         return Uri::addUrlParameter($_path, $this->query);
     }
 
+    /** @inheritdoc */
+    public function __toString()
+    {
+        return $this->getPath();
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
     /**
      * @return string
      */
     public function getPathBase()
     {
         return $this->pathBase;
-    }
-
-    /** @inheritdoc */
-    public function __toString()
-    {
-        return $this->getPath();
     }
 }

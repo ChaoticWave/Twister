@@ -1,6 +1,5 @@
 <?php namespace ChaoticWave\Twister\Traits;
 
-use ChaoticWave\BlueVelvet\Enums\Verbs;
 use ChaoticWave\Twister\Endpoints\TwitterEndpoint;
 
 /**
